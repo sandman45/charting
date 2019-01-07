@@ -37,13 +37,34 @@ const options3 = {
     low: 0,
 };
 
+const data4 = {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    series: [
+        [1, 5, 2, 5, 4, 3],
+        [2, 3, 4, 8, 1, 2],
+        [5, 4, 3, 2, 1, 0.5],
+    ],
+};
+
+const options4 = {
+    low: 0,
+    showArea: true,
+    showPoint: true,
+    fullWidth: true,
+};
+
+let max = 100;
+let count = 45;
+
 new Chartist.Line('#chart1', data1, options1);
 
 new Chartist.Line('#chart2', data2, options2);
 
 const chart3 = new Chartist.Line('#chart3', data3, options3);
 
-// animation
+const chart4 = new Chartist.Line('#chart4', data4, options4);
+
+// animation for chart 3
 let seq = 0;
 let delays = 80;
 let durations = 500;
@@ -148,4 +169,24 @@ chart3.on('created', function() {
         window.__exampleAnimateTimeout = null;
     }
     window.__exampleAnimateTimeout = setTimeout(chart3.update.bind(chart3), 12000);
+});
+
+// animation for chart 4
+
+chart4.on('draw', function(data) {
+    if(data.type === 'line' || data.type === 'area') {
+        data.element.animate({
+            d: {
+                begin: 2000 * data.index,
+                dur: 2000,
+                from: data.path.clone().scale(1, 0).translate(0, data.chartRect.height()).stringify(),
+                to: data.path.clone().stringify(),
+                easing: Chartist.Svg.Easing.easeOutQuint
+            }
+        });
+        data.element.attr({
+            // Now we set the style attribute on our bar to override the default color of the bar. By using a HSL colour we can easily set the hue of the colour dynamically while keeping the same saturation and lightness. From the context we can also get the current value of the bar. We use that value to calculate a hue between 0 and 100 degree. This will make our bars appear green when close to the maximum and red when close to zero.
+            style: 'stroke: hsl(' + Math.floor(Chartist.getMultiValue(data.value) / max * 100) + ', 50%, 50%);'
+        });
+    }
 });
